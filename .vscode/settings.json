@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "addrspace.h": "c",
+        "vm.h": "c",
+        "spinlock.h": "c",
+        "lib.h": "c"
+    }
+}

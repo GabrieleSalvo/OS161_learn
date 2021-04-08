@@ -1,0 +1,33 @@
+#include "file_syscalls.h"
+
+
+
+void sys_write(int filehandle, const void* buf, size_t size){
+	(void)filehandle;	
+	int character;
+	size_t i;
+	int* buff = (int*)buf;
+	if(filehandle!=STDOUT_FILENO && filehandle!=STDERR_FILENO){
+		kprintf("sys write not supported for files\n");
+	}
+	for(i=0;i<size;i++){
+		character = buff[i];
+    	putch(character);
+	}
+    
+}
+
+ssize_t sys_read(int filehandle, void* buf, size_t size){
+	int i;
+	char *p = (char *)buf;
+
+	if(filehandle!=STDIN_FILENO)
+		kprintf("sys_read only to stdin\n");
+
+	for(i=0;i<(int)size;i++){
+		p[i] = getch();
+		if(p[i]<0)
+			return i;
+	}
+	return (int)size;
+}
