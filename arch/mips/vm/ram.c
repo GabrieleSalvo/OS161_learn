@@ -109,6 +109,11 @@ ram_stealmem(unsigned long npages)
 	return alloc_paddr_to_return;
 }
 
+void ram_freemem(paddr_t start){
+	(void)start;
+	
+}
+
 /*
  * This function is intended to be called by the VM system when it
  * initializes in order to find out what memory it has available to

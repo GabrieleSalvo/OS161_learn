@@ -100,6 +100,7 @@ getppages(unsigned long npages)
     unsigned long page_index, base_page;
 	spinlock_acquire(&stealmem_lock);
 
+    
 	addr = ram_stealmem(npages);
 
     base_page = addr/PAGE_SIZE;
@@ -128,8 +129,10 @@ alloc_kpages(unsigned npages)
 void
 free_kpages(vaddr_t addr)
 {
-    dumbvm_can_sleep();
-	kfree(addr);
+    //TODO implement ram_freemem and update bitmap
+    paddr_t pa = KVADDR_TO_PADDR(addr)
+    ram_freemem(pa);
+
 }
 
 void

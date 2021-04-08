@@ -136,6 +136,7 @@ struct tlbshootdown {
 
 int pages_bitmap[SIZE_BITMAP];
 
+//TODO struct list of alloc spaces
 
 
 #endif /* _MIPS_VM_H_ */
