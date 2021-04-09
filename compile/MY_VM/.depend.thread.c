@@ -10,4 +10,5 @@ thread.o: ../../thread/thread.c ../../include/types.h \
  ../../include/threadprivate.h ../../include/proc.h \
  ../../include/current.h includelinks/machine/current.h \
  ../../include/synch.h ../../include/addrspace.h ../../include/vm.h \
- opt-dumbvm.h ../../include/mainbus.h ../../include/vnode.h
+ includelinks/mips/tlb.h opt-dumbvm.h ../../include/mainbus.h \
+ ../../include/vnode.h

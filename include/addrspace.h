@@ -34,7 +34,6 @@
  * Address space structure and operations.
  */
 
-#include <vm.h>
 #include <mips/tlb.h>
 #include "opt-dumbvm.h"
 
@@ -68,6 +67,17 @@ struct addrspace {
         paddr_t as_pbase_stack;
 #endif
 };
+
+struct node_list{
+    struct addrspace* as;
+    struct node_list* next;
+};
+struct addrspace_list
+{
+    struct node_list* head;
+};
+
+struct addrspace_list* vm_addrspace_list = NULL;
 
 /*
  * Functions in addrspace.c:
@@ -131,7 +141,7 @@ int               as_prepare_load(struct addrspace *as);
 int               as_complete_load(struct addrspace *as);
 int               as_define_stack(struct addrspace *as, vaddr_t *initstackptr);
 
-int insert_addrspace_in_list(struct addrspace* as);
+int insert_addrspace_in_list(struct addrspace* as, struct addrspace_list* vm_addrspace_list);
 
 
 

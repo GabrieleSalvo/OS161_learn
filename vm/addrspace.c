@@ -30,10 +30,11 @@
 #include <types.h>
 #include <kern/errno.h>
 #include <lib.h>
-#include <addrspace.h>
 #include <spl.h>
 #include <spinlock.h>
 #include <proc.h>
+#include <addrspace.h>
+#include <vm.h>
 
 /*
  * Note! If OPT_DUMBVM is set, as is the case until you start the VM
@@ -149,6 +150,16 @@ int as_define_kernel_region(struct addrspace *as, vaddr_t vaddr, paddr_t paddr, 
 	as->as_npages_code = npages;
 	return 0;
 
+}
+int insert_addrspace_in_list(struct addrspace* as, struct addrspace_list* vm_addrspace_list){
+	struct node_list* old_head = vm_addrspace_list->head;
+	struct node_list* new_node = kmalloc(sizeof(struct node_list));
+	if (new_node==NULL)
+		return 0;
+	new_node->as = as;
+	vm_addrspace_list->head = new_node;
+	vm_addrspace_list->head->next = old_head;
+	return 1;
 }
 
 static

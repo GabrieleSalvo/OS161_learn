@@ -32,14 +32,12 @@
 #include <lib.h>
 #include <spl.h>
 #include <cpu.h>
-#include <lib.h>
 #include <spinlock.h>
 #include <proc.h>
 #include <current.h>
 #include <mips/tlb.h>
 #include <addrspace.h>
 #include <vm.h>
-#include <lib.h>
 
 /*
  * Dumb MIPS-only "VM system" that is intended to only be just barely
@@ -136,21 +134,12 @@ alloc_kpages(unsigned npages)
 
 	as_define_kernel_region(as, va, pa, npages);
 
-	if (insert_addrspace_in_list(as)==0)
+	if (insert_addrspace_in_list(as, vm_addrspace_list)==0)
 		return 0;
 	
 	return va;
 }
-int insert_addrspace_in_list(struct addrspace* as){
-	struct node_list* old_head = vm_addrspace_list->head;
-	struct node_list* new_node = kmalloc(sizeof(struct node_list));
-	if (new_node==NULL)
-		return 0;
-	new_node->as = as;
-	vm_addrspace_list->head = new_node;
-	vm_addrspace_list->head->next = old_head;
-	return 1;
-}
+
 
 void
 free_kpages(vaddr_t addr)

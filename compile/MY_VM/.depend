@@ -381,6 +381,7 @@ main.o: ../../main/main.c ../../include/types.h \
  includelinks/kern/machine/setjmp.h ../../include/proc.h \
  ../../include/current.h includelinks/machine/current.h \
  ../../include/synch.h ../../include/vm.h includelinks/machine/vm.h \
+ ../../include/addrspace.h includelinks/mips/tlb.h opt-dumbvm.h \
  ../../include/mainbus.h ../../include/vfs.h ../../include/device.h \
  ../../include/syscall.h opt-syscalls.h ../../include/test.h \
  ../../include/version.h autoconf.h ../../include/hello.h opt-hello.h \
@@ -410,7 +411,7 @@ proc.o: ../../proc/proc.c ../../include/types.h \
  ../../include/threadlist.h includelinks/machine/thread.h \
  ../../include/setjmp.h includelinks/kern/machine/setjmp.h \
  ../../include/addrspace.h ../../include/vm.h includelinks/machine/vm.h \
- opt-dumbvm.h ../../include/vnode.h
+ includelinks/mips/tlb.h opt-dumbvm.h ../../include/vnode.h
 file_syscalls.o: ../../syscall/file_syscalls.c ../../include/types.h \
  ../../include/kern/types.h includelinks/kern/machine/types.h \
  includelinks/machine/types.h ../../include/kern/unistd.h \
@@ -421,7 +422,8 @@ file_syscalls.o: ../../syscall/file_syscalls.c ../../include/types.h \
  ../../include/thread.h ../../include/array.h ../../include/threadlist.h \
  includelinks/machine/thread.h ../../include/setjmp.h \
  includelinks/kern/machine/setjmp.h ../../include/addrspace.h \
- ../../include/vm.h includelinks/machine/vm.h opt-dumbvm.h
+ ../../include/vm.h includelinks/machine/vm.h includelinks/mips/tlb.h \
+ opt-dumbvm.h
 loadelf.o: ../../syscall/loadelf.c ../../include/types.h \
  ../../include/kern/types.h includelinks/kern/machine/types.h \
  includelinks/machine/types.h ../../include/kern/errno.h \
@@ -432,8 +434,9 @@ loadelf.o: ../../syscall/loadelf.c ../../include/types.h \
  ../../include/thread.h ../../include/array.h ../../include/threadlist.h \
  includelinks/machine/thread.h ../../include/setjmp.h \
  includelinks/kern/machine/setjmp.h ../../include/addrspace.h \
- ../../include/vm.h includelinks/machine/vm.h opt-dumbvm.h \
- ../../include/vnode.h ../../include/elf.h includelinks/machine/elf.h
+ ../../include/vm.h includelinks/machine/vm.h includelinks/mips/tlb.h \
+ opt-dumbvm.h ../../include/vnode.h ../../include/elf.h \
+ includelinks/machine/elf.h
 runprogram.o: ../../syscall/runprogram.c ../../include/types.h \
  ../../include/kern/types.h includelinks/kern/machine/types.h \
  includelinks/machine/types.h ../../include/kern/errno.h \
@@ -444,8 +447,8 @@ runprogram.o: ../../syscall/runprogram.c ../../include/types.h \
  ../../include/array.h ../../include/threadlist.h \
  includelinks/machine/thread.h ../../include/setjmp.h \
  includelinks/kern/machine/setjmp.h ../../include/addrspace.h \
- ../../include/vm.h includelinks/machine/vm.h opt-dumbvm.h \
- ../../include/vfs.h ../../include/syscall.h opt-syscalls.h \
+ ../../include/vm.h includelinks/machine/vm.h includelinks/mips/tlb.h \
+ opt-dumbvm.h ../../include/vfs.h ../../include/syscall.h opt-syscalls.h \
  ../../include/test.h
 time_syscalls.o: ../../syscall/time_syscalls.c ../../include/types.h \
  ../../include/kern/types.h includelinks/kern/machine/types.h \
@@ -479,8 +482,8 @@ kmalloctest.o: ../../test/kmalloctest.c ../../include/types.h \
  includelinks/machine/spinlock.h ../../include/threadlist.h \
  includelinks/machine/thread.h ../../include/setjmp.h \
  includelinks/kern/machine/setjmp.h ../../include/synch.h \
- ../../include/vm.h includelinks/machine/vm.h ../../include/test.h \
- opt-dumbvm.h
+ ../../include/vm.h includelinks/machine/vm.h ../../include/addrspace.h \
+ includelinks/mips/tlb.h opt-dumbvm.h ../../include/test.h
 semunit.o: ../../test/semunit.c ../../include/types.h \
  ../../include/kern/types.h includelinks/kern/machine/types.h \
  includelinks/machine/types.h ../../include/lib.h ../../include/cdefs.h \
@@ -573,7 +576,8 @@ thread.o: ../../thread/thread.c ../../include/types.h \
  ../../include/threadprivate.h ../../include/proc.h \
  ../../include/current.h includelinks/machine/current.h \
  ../../include/synch.h ../../include/addrspace.h ../../include/vm.h \
- opt-dumbvm.h ../../include/mainbus.h ../../include/vnode.h
+ includelinks/mips/tlb.h opt-dumbvm.h ../../include/mainbus.h \
+ ../../include/vnode.h
 threadlist.o: ../../thread/threadlist.c ../../include/types.h \
  ../../include/kern/types.h includelinks/kern/machine/types.h \
  includelinks/machine/types.h ../../include/lib.h ../../include/cdefs.h \
@@ -648,28 +652,30 @@ addrspace.o: ../../vm/addrspace.c ../../include/types.h \
  ../../include/kern/types.h includelinks/kern/machine/types.h \
  includelinks/machine/types.h ../../include/kern/errno.h \
  ../../include/lib.h ../../include/cdefs.h opt-noasserts.h \
+ ../../include/spl.h ../../include/spinlock.h \
+ includelinks/machine/spinlock.h ../../include/proc.h \
  ../../include/addrspace.h ../../include/vm.h includelinks/machine/vm.h \
- opt-dumbvm.h ../../include/proc.h ../../include/spinlock.h \
- includelinks/machine/spinlock.h
+ includelinks/mips/tlb.h opt-dumbvm.h
 kmalloc.o: ../../vm/kmalloc.c ../../include/types.h \
  ../../include/kern/types.h includelinks/kern/machine/types.h \
  includelinks/machine/types.h ../../include/lib.h ../../include/cdefs.h \
  opt-noasserts.h ../../include/spinlock.h includelinks/machine/spinlock.h \
- ../../include/vm.h includelinks/machine/vm.h
+ ../../include/vm.h includelinks/machine/vm.h ../../include/addrspace.h \
+ includelinks/mips/tlb.h opt-dumbvm.h
 trap.o: ../../arch/mips/locore/trap.c ../../include/types.h \
  ../../include/kern/types.h includelinks/kern/machine/types.h \
  includelinks/machine/types.h ../../include/signal.h \
  includelinks/kern/machine/signal.h ../../include/kern/signal.h \
- ../../include/lib.h ../../include/cdefs.h opt-noasserts.h \
  includelinks/mips/specialreg.h includelinks/mips/trapframe.h \
- ../../include/cpu.h ../../include/spinlock.h \
+ ../../include/cpu.h ../../include/spinlock.h ../../include/cdefs.h \
  includelinks/machine/spinlock.h ../../include/threadlist.h \
  includelinks/machine/vm.h ../../include/spl.h ../../include/thread.h \
- ../../include/array.h includelinks/machine/thread.h \
- ../../include/setjmp.h includelinks/kern/machine/setjmp.h \
- ../../include/current.h includelinks/machine/current.h \
- ../../include/vm.h ../../include/mainbus.h ../../include/syscall.h \
- opt-syscalls.h
+ ../../include/array.h ../../include/lib.h opt-noasserts.h \
+ includelinks/machine/thread.h ../../include/setjmp.h \
+ includelinks/kern/machine/setjmp.h ../../include/current.h \
+ includelinks/machine/current.h ../../include/vm.h \
+ ../../include/addrspace.h includelinks/mips/tlb.h opt-dumbvm.h \
+ ../../include/mainbus.h ../../include/syscall.h opt-syscalls.h
 syscall.o: ../../arch/mips/syscall/syscall.c ../../include/types.h \
  ../../include/kern/types.h includelinks/kern/machine/types.h \
  includelinks/machine/types.h ../../include/kern/errno.h \
@@ -714,6 +720,7 @@ ram.o: ../../arch/mips/vm/ram.c ../../include/types.h \
  ../../include/kern/types.h includelinks/kern/machine/types.h \
  includelinks/machine/types.h ../../include/lib.h ../../include/cdefs.h \
  opt-noasserts.h ../../include/vm.h includelinks/machine/vm.h \
+ ../../include/addrspace.h includelinks/mips/tlb.h opt-dumbvm.h \
  ../../include/mainbus.h
 adddi3.o: ../../../common/gcc-millicode/adddi3.c \
  ../../../common/gcc-millicode/longlong.h ../../include/types.h \
@@ -840,7 +847,8 @@ copyinout.o: ../../vm/copyinout.c ../../include/types.h \
  includelinks/machine/spinlock.h ../../include/threadlist.h \
  includelinks/machine/thread.h ../../include/current.h \
  includelinks/machine/current.h ../../include/vm.h \
- includelinks/machine/vm.h ../../include/copyinout.h
+ includelinks/machine/vm.h ../../include/addrspace.h \
+ includelinks/mips/tlb.h opt-dumbvm.h ../../include/copyinout.h
 cache-mips161.o: ../../arch/mips/locore/cache-mips161.S \
  includelinks/kern/mips/regdefs.h
 exception-mips1.o: ../../arch/mips/locore/exception-mips1.S \

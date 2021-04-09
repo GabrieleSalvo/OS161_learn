@@ -38,6 +38,7 @@
 
 
 #include <machine/vm.h>
+#include <addrspace.h>
 
 /* Fault-type arguments to vm_fault() */
 #define VM_FAULT_READ        0    /* A read was attempted */
@@ -57,17 +58,5 @@ void free_kpages(vaddr_t addr);
 
 /* TLB shootdown handling called from interprocessor_interrupt */
 void vm_tlbshootdown(const struct tlbshootdown *);
-
-
-struct node_list{
-    struct addrspace* as;
-    struct node_list* next;
-};
-struct addrspace_list
-{
-    struct node_list* head;
-};
-
-struct addrspace_list* vm_addrspace_list;
 
 #endif /* _VM_H_ */
