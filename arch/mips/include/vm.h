@@ -109,7 +109,6 @@
 
 void ram_bootstrap(void);
 paddr_t ram_stealmem(unsigned long npages);
-void ram_freemem(paddr_t start)
 paddr_t ram_getsize(void);
 paddr_t ram_getfirstfree(void);
 void  dumbvm_can_sleep(void);
@@ -136,7 +135,6 @@ struct tlbshootdown {
 
 int pages_bitmap[SIZE_BITMAP];
 
-//TODO struct list of alloc spaces
 
 
 #endif /* _MIPS_VM_H_ */

@@ -103,16 +103,14 @@ ram_stealmem(unsigned long npages)
 		return 0;
 	}
 
+
+
 	alloc_paddr_to_return = firstpaddr;
 	firstpaddr += size;
 
 	return alloc_paddr_to_return;
 }
 
-void ram_freemem(paddr_t start){
-	(void)start;
-	
-}
 
 /*
  * This function is intended to be called by the VM system when it

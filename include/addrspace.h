@@ -34,7 +34,6 @@
  * Address space structure and operations.
  */
 
-
 #include <vm.h>
 #include <mips/tlb.h>
 #include "opt-dumbvm.h"
@@ -127,9 +126,13 @@ int               as_define_region(struct addrspace *as,
                                    int readable,
                                    int writeable,
                                    int executable);
+int               as_define_kernel_region(struct addrspace *as, vaddr_t vaddr, paddr_t paddr, size_t npages);
 int               as_prepare_load(struct addrspace *as);
 int               as_complete_load(struct addrspace *as);
 int               as_define_stack(struct addrspace *as, vaddr_t *initstackptr);
+
+int insert_addrspace_in_list(struct addrspace* as);
+
 
 
 /*

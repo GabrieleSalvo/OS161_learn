@@ -70,6 +70,14 @@ vm_bootstrap(void)
     unsigned int i;
     for(i=0;i<SIZE_BITMAP;i++)
         pages_bitmap[i]=0;
+	struct node_list* head = kmalloc(sizeof(struct node_list));
+	if(head == NULL)
+		panic("not enough space for node list");
+	head->next=NULL;
+	vm_addrspace_list = kmalloc(sizeof(struct addrspace_list)) ;
+	if(vm_addrspace_list==NULL)
+		panic("not enough space for vm_addrspace_list");
+	vm_addrspace_list->head=NULL;
 }
 
 /*
@@ -117,23 +125,43 @@ vaddr_t
 alloc_kpages(unsigned npages)
 {
 	paddr_t pa;
-
+	struct addrspace* as = as_create();
+	
 	dumbvm_can_sleep();
 	pa = getppages(npages);
 	if (pa==0) {
 		return 0;
 	}
-	return PADDR_TO_KVADDR(pa);
+	vaddr_t va = PADDR_TO_KVADDR(pa);
+
+	as_define_kernel_region(as, va, pa, npages);
+
+	if (insert_addrspace_in_list(as)==0)
+		return 0;
+	
+	return va;
+}
+int insert_addrspace_in_list(struct addrspace* as){
+	struct node_list* old_head = vm_addrspace_list->head;
+	struct node_list* new_node = kmalloc(sizeof(struct node_list));
+	if (new_node==NULL)
+		return 0;
+	new_node->as = as;
+	vm_addrspace_list->head = new_node;
+	vm_addrspace_list->head->next = old_head;
+	return 1;
 }
 
 void
 free_kpages(vaddr_t addr)
 {
     //TODO implement ram_freemem and update bitmap
-    paddr_t pa = KVADDR_TO_PADDR(addr)
-    ram_freemem(pa);
+    paddr_t pa = KVADDR_TO_PADDR(addr);
+	(void)pa;
+	//freeppages()
 
 }
+
 
 void
 vm_tlbshootdown(const struct tlbshootdown *ts)
@@ -145,7 +173,7 @@ vm_tlbshootdown(const struct tlbshootdown *ts)
 int
 vm_fault(int faulttype, vaddr_t faultaddress)
 {
-	vaddr_t vbase1, vtop1, vbase2, vtop2, stackbase, stacktop;
+	vaddr_t vbase_code, vtop_code, vbase_data, vtop_data, stackbase, stacktop;
 	paddr_t paddr;
 	int i;
 	uint32_t ehi, elo;
@@ -186,34 +214,34 @@ vm_fault(int faulttype, vaddr_t faultaddress)
 	}
 
 	/* Assert that the address space has been set up properly. */
-	KASSERT(as->as_vbase1 != 0);
-	KASSERT(as->as_pbase1 != 0);
-	KASSERT(as->as_npages1 != 0);
-	KASSERT(as->as_vbase2 != 0);
-	KASSERT(as->as_pbase2 != 0);
-	KASSERT(as->as_npages2 != 0);
-	KASSERT(as->as_stackpbase != 0);
-	KASSERT((as->as_vbase1 & PAGE_FRAME) == as->as_vbase1);
-	KASSERT((as->as_pbase1 & PAGE_FRAME) == as->as_pbase1);
-	KASSERT((as->as_vbase2 & PAGE_FRAME) == as->as_vbase2);
-	KASSERT((as->as_pbase2 & PAGE_FRAME) == as->as_pbase2);
-	KASSERT((as->as_stackpbase & PAGE_FRAME) == as->as_stackpbase);
+	KASSERT(as->as_vbase_code != 0);
+	KASSERT(as->as_pbase_code != 0);
+	KASSERT(as->as_npages_code != 0);
+	KASSERT(as->as_vbase_data != 0);
+	KASSERT(as->as_pbase_data != 0);
+	KASSERT(as->as_npages_data != 0);
+	KASSERT(as->as_pbase_stack != 0);
+	KASSERT((as->as_vbase_code & PAGE_FRAME) == as->as_vbase_code);
+	KASSERT((as->as_pbase_code & PAGE_FRAME) == as->as_pbase_code);
+	KASSERT((as->as_vbase_data & PAGE_FRAME) == as->as_vbase_data);
+	KASSERT((as->as_pbase_data & PAGE_FRAME) == as->as_pbase_data);
+	KASSERT((as->as_pbase_stack & PAGE_FRAME) == as->as_pbase_stack);
 
-	vbase1 = as->as_vbase1;
-	vtop1 = vbase1 + as->as_npages1 * PAGE_SIZE;
-	vbase2 = as->as_vbase2;
-	vtop2 = vbase2 + as->as_npages2 * PAGE_SIZE;
+	vbase_code = as->as_vbase_code;
+	vtop_code = vbase_code + as->as_npages_code * PAGE_SIZE;
+	vbase_data = as->as_vbase_data;
+	vtop_data = vbase_data + as->as_npages_data * PAGE_SIZE;
 	stackbase = USERSTACK - DUMBVM_STACKPAGES * PAGE_SIZE;
 	stacktop = USERSTACK;
 
-	if (faultaddress >= vbase1 && faultaddress < vtop1) {
-		paddr = (faultaddress - vbase1) + as->as_pbase1;
+	if (faultaddress >= vbase_code && faultaddress < vtop_code) {
+		paddr = (faultaddress - vbase_code) + as->as_pbase_code;
 	}
-	else if (faultaddress >= vbase2 && faultaddress < vtop2) {
-		paddr = (faultaddress - vbase2) + as->as_pbase2;
+	else if (faultaddress >= vbase_data && faultaddress < vtop_data) {
+		paddr = (faultaddress - vbase_data) + as->as_pbase_data;
 	}
 	else if (faultaddress >= stackbase && faultaddress < stacktop) {
-		paddr = (faultaddress - stackbase) + as->as_stackpbase;
+		paddr = (faultaddress - stackbase) + as->as_pbase_stack;
 	}
 	else {
 		return EFAULT;
