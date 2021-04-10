@@ -55,6 +55,7 @@
  * it's cutting (there are many) and why, and more importantly, how.
  */
 
+#define DUMBVM_STACKPAGES    18
 
 
 /*
@@ -68,6 +69,7 @@ vm_bootstrap(void)
     unsigned int i;
     for(i=0;i<SIZE_BITMAP;i++)
         pages_bitmap[i]=0;
+		/*
 	struct node_list* head = kmalloc(sizeof(struct node_list));
 	if(head == NULL)
 		panic("not enough space for node list");
@@ -76,6 +78,7 @@ vm_bootstrap(void)
 	if(vm_addrspace_list==NULL)
 		panic("not enough space for vm_addrspace_list");
 	vm_addrspace_list->head=NULL;
+	*/
 }
 
 /*
@@ -123,7 +126,7 @@ vaddr_t
 alloc_kpages(unsigned npages)
 {
 	paddr_t pa;
-	struct addrspace* as = as_create();
+	//struct addrspace* as = as_create();
 	
 	dumbvm_can_sleep();
 	pa = getppages(npages);
@@ -132,11 +135,11 @@ alloc_kpages(unsigned npages)
 	}
 	vaddr_t va = PADDR_TO_KVADDR(pa);
 
-	as_define_kernel_region(as, va, pa, npages);
-
+//	as_define_kernel_region(as, va, pa, npages);
+/*
 	if (insert_addrspace_in_list(as, vm_addrspace_list)==0)
 		return 0;
-	
+*/	
 	return va;
 }
 
@@ -258,5 +261,225 @@ vm_fault(int faulttype, vaddr_t faultaddress)
 	kprintf("dumbvm: Ran out of TLB entries - cannot handle page fault\n");
 	splx(spl);
 	return EFAULT;
+}
+
+struct addrspace* as_create(void)
+{
+	struct addrspace *as = kmalloc(sizeof(struct addrspace));
+	if (as==NULL) {
+		return NULL;
+	}
+
+	as->as_vbase_code = 0;
+	as->as_pbase_code = 0;
+	as->as_npages_code = 0;
+	as->as_vbase_data = 0;
+	as->as_pbase_data = 0;
+	as->as_npages_data = 0;
+	as->as_pbase_stack = 0;
+
+	return as;
+}
+
+void
+as_destroy(struct addrspace *as)
+{
+	dumbvm_can_sleep();
+	kfree(as);
+}
+
+void
+as_activate(void)
+{
+	int i, spl;
+	struct addrspace *as;
+
+	as = proc_getas();
+	if (as == NULL) {
+		return;
+	}
+
+	/* Disable interrupts on this CPU while frobbing the TLB. */
+	spl = splhigh();
+
+	for (i=0; i<NUM_TLB; i++) {
+		tlb_write(TLBHI_INVALID(i), TLBLO_INVALID(), i);
+	}
+
+	splx(spl);
+}
+
+void
+as_deactivate(void)
+{
+	/* nothing */
+}
+/*
+ * Set up a segment at virtual address VADDR of size MEMSIZE. The
+ * segment in memory extends from VADDR up to (but not including)
+ * VADDR+MEMSIZE.
+ *
+ * The READABLE, WRITEABLE, and EXECUTABLE flags are set if read,
+ * write, or execute permission should be set on the segment. At the
+ * moment, these are ignored. When you write the VM system, you may
+ * want to implement them.
+ */
+int
+as_define_region(struct addrspace *as, vaddr_t vaddr, size_t sz,
+		 int readable, int writeable, int executable)
+{
+	size_t npages;
+
+	dumbvm_can_sleep();
+
+	/* Align the region. First, the base... */
+	sz += vaddr & ~(vaddr_t)PAGE_FRAME;
+	vaddr &= PAGE_FRAME;
+
+	/* ...and now the length. */
+	sz = (sz + PAGE_SIZE - 1) & PAGE_FRAME;
+
+	npages = sz / PAGE_SIZE;
+
+	/* We don't use these - all pages are read-write */
+	(void)readable;
+	(void)writeable;
+	(void)executable;
+
+	if (as->as_vbase_code == 0) {
+		as->as_vbase_code = vaddr;
+		as->as_npages_code = npages;
+		return 0;
+	}
+
+	if (as->as_vbase_data == 0) {
+		as->as_vbase_data = vaddr;
+		as->as_npages_data = npages;
+		return 0;
+	}
+
+	/*
+	 * Support for more than two regions is not available.
+	 */
+	kprintf("dumbvm: Warning: too many regions\n");
+	return ENOSYS;
+}
+/*
+int as_define_kernel_region(struct addrspace *as, vaddr_t vaddr, paddr_t paddr, size_t npages){
+	as->as_pbase_code = paddr;
+	as->as_vbase_code = vaddr;
+	as->as_npages_code = npages;
+	return 0;
+
+}*/
+/*
+int insert_addrspace_in_list(struct addrspace* as, struct addrspace_list* vm_addrspace_list){
+	struct node_list* old_head = vm_addrspace_list->head;
+	struct node_list* new_node = kmalloc(sizeof(struct node_list));
+	if (new_node==NULL)
+		return 0;
+	new_node->as = as;
+	vm_addrspace_list->head = new_node;
+	vm_addrspace_list->head->next = old_head;
+	return 1;
+}*/
+
+static
+void
+as_zero_region(paddr_t paddr, unsigned npages)
+{
+	bzero((void *)PADDR_TO_KVADDR(paddr), npages * PAGE_SIZE);
+}
+
+//TODO to modify to insert bitmap
+int
+as_prepare_load(struct addrspace *as)
+{
+	KASSERT(as->as_pbase_code == 0);
+	KASSERT(as->as_pbase_data == 0);
+	KASSERT(as->as_pbase_stack == 0);
+
+	dumbvm_can_sleep();
+
+	as->as_pbase_code = getppages(as->as_npages_code);
+	if (as->as_pbase_code == 0) {
+		return ENOMEM;
+	}
+
+	as->as_pbase_data = getppages(as->as_npages_data);
+	if (as->as_pbase_data == 0) {
+		return ENOMEM;
+	}
+
+	as->as_pbase_stack = getppages(DUMBVM_STACKPAGES);
+	if (as->as_pbase_stack == 0) {
+		return ENOMEM;
+	}
+
+	as_zero_region(as->as_pbase_code, as->as_npages_code);
+	as_zero_region(as->as_pbase_data, as->as_npages_data);
+	as_zero_region(as->as_pbase_stack, DUMBVM_STACKPAGES);
+
+	return 0;
+}
+
+int
+as_complete_load(struct addrspace *as)
+{
+	dumbvm_can_sleep();
+	(void)as;
+	return 0;
+}
+
+int
+as_define_stack(struct addrspace *as, vaddr_t *stackptr)
+{
+	KASSERT(as->as_pbase_stack != 0);
+
+	*stackptr = USERSTACK;
+	return 0;
+}
+
+int
+as_copy(struct addrspace *old, struct addrspace **ret)
+{
+	struct addrspace *new;
+
+	dumbvm_can_sleep();
+
+	new = as_create();
+	if (new==NULL) {
+		return ENOMEM;
+	}
+
+	new->as_vbase_code = old->as_vbase_code;
+	new->as_npages_code = old->as_npages_code;
+	new->as_vbase_data = old->as_vbase_data;
+	new->as_npages_data = old->as_npages_data;
+
+	/* (Mis)use as_prepare_load to allocate some physical memory. */
+	if (as_prepare_load(new)) {
+		as_destroy(new);
+		return ENOMEM;
+	}
+
+	KASSERT(new->as_pbase_code != 0);
+	KASSERT(new->as_pbase_data != 0);
+	KASSERT(new->as_pbase_stack != 0);
+
+	memmove((void *)PADDR_TO_KVADDR(new->as_pbase_code),
+		(const void *)PADDR_TO_KVADDR(old->as_pbase_code),
+		old->as_npages_code*PAGE_SIZE);
+
+	memmove((void *)PADDR_TO_KVADDR(new->as_pbase_data),
+		(const void *)PADDR_TO_KVADDR(old->as_pbase_data),
+		old->as_npages_data*PAGE_SIZE);
+
+	memmove((void *)PADDR_TO_KVADDR(new->as_pbase_stack),
+		(const void *)PADDR_TO_KVADDR(old->as_pbase_stack),
+		DUMBVM_STACKPAGES*PAGE_SIZE);
+
+	*ret = new;
+	return 0;
 }
 

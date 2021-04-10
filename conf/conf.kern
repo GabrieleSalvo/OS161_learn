@@ -339,7 +339,12 @@ file      proc/proc.c
 
 file      vm/kmalloc.c
 
+defoption   my_vm
+
 optofffile dumbvm   vm/addrspace.c
+optofffile my_vm   vm/addrspace.c
+optofffile my_vm   arch/mips/vm/dumbvm.c
+
 
 #
 # Network
@@ -443,5 +448,4 @@ optfile	hello   main/hello.c
 defoption 	threads
 defoption	syscalls
 optfile syscalls syscall/file_syscalls.c
-defoption   my_vm
 optfile  my_vm arch/mips/vm/my_vm.c

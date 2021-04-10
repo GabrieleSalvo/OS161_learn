@@ -67,7 +67,7 @@ struct addrspace {
         paddr_t as_pbase_stack;
 #endif
 };
-
+/*
 struct node_list{
     struct addrspace* as;
     struct node_list* next;
@@ -77,7 +77,7 @@ struct addrspace_list
     struct node_list* head;
 };
 
-struct addrspace_list* vm_addrspace_list = NULL;
+struct addrspace_list* vm_addrspace_list = NULL;*/
 
 /*
  * Functions in addrspace.c:
@@ -123,7 +123,6 @@ struct addrspace_list* vm_addrspace_list = NULL;
 /* under dumbvm, always have 72k of user stack */
 /* (this must be > 64K so argument blocks of size ARG_MAX will fit) */
 
-#define DUMBVM_STACKPAGES    18
 
 struct addrspace *as_create(void);
 int               as_copy(struct addrspace *src, struct addrspace **ret);
@@ -136,12 +135,12 @@ int               as_define_region(struct addrspace *as,
                                    int readable,
                                    int writeable,
                                    int executable);
-int               as_define_kernel_region(struct addrspace *as, vaddr_t vaddr, paddr_t paddr, size_t npages);
+//int               as_define_kernel_region(struct addrspace *as, vaddr_t vaddr, paddr_t paddr, size_t npages);
 int               as_prepare_load(struct addrspace *as);
 int               as_complete_load(struct addrspace *as);
 int               as_define_stack(struct addrspace *as, vaddr_t *initstackptr);
 
-int insert_addrspace_in_list(struct addrspace* as, struct addrspace_list* vm_addrspace_list);
+//int insert_addrspace_in_list(struct addrspace* as, struct addrspace_list* vm_addrspace_list);
 
 
 

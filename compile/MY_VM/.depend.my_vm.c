@@ -8,5 +8,5 @@ my_vm.o: ../../arch/mips/vm/my_vm.c ../../include/types.h \
  includelinks/machine/current.h ../../include/thread.h \
  ../../include/array.h includelinks/machine/thread.h \
  ../../include/setjmp.h includelinks/kern/machine/setjmp.h \
- includelinks/mips/tlb.h ../../include/addrspace.h ../../include/vm.h \
- opt-dumbvm.h
+ includelinks/mips/tlb.h ../../include/addrspace.h opt-dumbvm.h \
+ ../../include/vm.h

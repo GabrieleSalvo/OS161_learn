@@ -7,5 +7,4 @@ copyinout.o: ../../vm/copyinout.c ../../include/types.h \
  includelinks/machine/spinlock.h ../../include/threadlist.h \
  includelinks/machine/thread.h ../../include/current.h \
  includelinks/machine/current.h ../../include/vm.h \
- includelinks/machine/vm.h ../../include/addrspace.h \
- includelinks/mips/tlb.h opt-dumbvm.h ../../include/copyinout.h
+ includelinks/machine/vm.h ../../include/copyinout.h

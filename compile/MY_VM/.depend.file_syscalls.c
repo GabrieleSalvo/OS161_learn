@@ -8,5 +8,4 @@ file_syscalls.o: ../../syscall/file_syscalls.c ../../include/types.h \
  ../../include/thread.h ../../include/array.h ../../include/threadlist.h \
  includelinks/machine/thread.h ../../include/setjmp.h \
  includelinks/kern/machine/setjmp.h ../../include/addrspace.h \
- ../../include/vm.h includelinks/machine/vm.h includelinks/mips/tlb.h \
- opt-dumbvm.h
+ includelinks/mips/tlb.h opt-dumbvm.h
