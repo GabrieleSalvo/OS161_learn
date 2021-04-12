@@ -29,6 +29,7 @@
 
 #include <types.h>
 #include <signal.h>
+#include <lib.h>
 #include <mips/specialreg.h>
 #include <mips/trapframe.h>
 #include <cpu.h>

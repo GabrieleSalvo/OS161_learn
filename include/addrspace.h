@@ -67,17 +67,7 @@ struct addrspace {
         paddr_t as_pbase_stack;
 #endif
 };
-/*
-struct node_list{
-    struct addrspace* as;
-    struct node_list* next;
-};
-struct addrspace_list
-{
-    struct node_list* head;
-};
 
-struct addrspace_list* vm_addrspace_list = NULL;*/
 
 /*
  * Functions in addrspace.c:
@@ -135,13 +125,10 @@ int               as_define_region(struct addrspace *as,
                                    int readable,
                                    int writeable,
                                    int executable);
-//int               as_define_kernel_region(struct addrspace *as, vaddr_t vaddr, paddr_t paddr, size_t npages);
+int               as_define_kernel_region(struct addrspace *as, vaddr_t vaddr, paddr_t paddr, size_t npages);
 int               as_prepare_load(struct addrspace *as);
 int               as_complete_load(struct addrspace *as);
 int               as_define_stack(struct addrspace *as, vaddr_t *initstackptr);
-
-//int insert_addrspace_in_list(struct addrspace* as, struct addrspace_list* vm_addrspace_list);
-
 
 
 /*

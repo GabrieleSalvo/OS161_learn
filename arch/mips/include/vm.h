@@ -113,6 +113,8 @@ paddr_t ram_getsize(void);
 paddr_t ram_getfirstfree(void);
 void  dumbvm_can_sleep(void);
 paddr_t getppages(unsigned long npages);
+paddr_t getfreeppages(unsigned long npages);
+int freeppages(paddr_t addr, unsigned long npages);
 
 /*
  * TLB shootdown bits.
@@ -128,12 +130,6 @@ struct tlbshootdown {
 };
 
 #define TLBSHOOTDOWN_MAX 16
-#define SetBit(A,k) (A[k/32] |= (1 << (k%32)))
-#define ClearBit(A,k) (A[k/32] &= ~(1 << (k%32))) 
-#define TestBit(A,k) (A[k/32] & (1 << (k%32))) 
-#define SIZE_BITMAP 0xffffffff / ( PAGE_SIZE * 32)
-
-int pages_bitmap[SIZE_BITMAP];
 
 
 
