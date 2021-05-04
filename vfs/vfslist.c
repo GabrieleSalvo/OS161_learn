@@ -96,7 +96,7 @@ static unsigned vfs_biglock_depth;
 
 
 /*
- * Setup function
+ * Setup function	
  */
 void
 vfs_bootstrap(void)
