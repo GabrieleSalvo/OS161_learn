@@ -449,3 +449,4 @@ defoption 	threads
 defoption	syscalls
 optfile syscalls syscall/file_syscalls.c
 optfile  my_vm arch/mips/vm/my_vm.c
+defoption locks

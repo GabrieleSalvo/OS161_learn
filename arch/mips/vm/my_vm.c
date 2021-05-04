@@ -86,7 +86,7 @@ void vm_bootstrap(void)
 	int i;
 	nRamFrames = ((int)ram_getsize()) / PAGE_SIZE;
 	freeRamFrames = kmalloc(sizeof(unsigned char) * (nRamFrames * 32));
-	KASSERT(sizeof(freeRamFrames) == SIZE_BITMAP);
+	// KASSERT(sizeof(freeRamFrames) == SIZE_BITMAP);
 
 	if (freeRamFrames == NULL)
 		return;

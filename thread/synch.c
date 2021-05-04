@@ -142,7 +142,7 @@ struct lock *
 lock_create(const char *name)
 {
         struct lock *lock;
-
+        
         lock = kmalloc(sizeof(*lock));
         if (lock == NULL) {
                 return NULL;
@@ -153,9 +153,15 @@ lock_create(const char *name)
                 kfree(lock);
                 return NULL;
         }
-
-        // add stuff here as needed
-
+#if OPT_LOCKS
+        lock->lk_semaphore = sem_create(name, 1);
+        if (lock->lk_semaphore == NULL) {
+                sem_destroy(lock->lk_semaphore);
+                return NULL;
+        }
+        lock->owner = NULL;
+	spinlock_init(&lock->lk_lock);
+#endif
         return lock;
 }
 
@@ -163,9 +169,11 @@ void
 lock_destroy(struct lock *lock)
 {
         KASSERT(lock != NULL);
-
-        // add stuff here as needed
-
+        KASSERT(!lock_do_i_hold(lock));
+#if OPT_LOCKS
+        sem_destroy(lock->lk_semaphore);
+        spinlock_cleanup(&lock->lk_lock);
+#endif
         kfree(lock->lk_name);
         kfree(lock);
 }
@@ -174,26 +182,44 @@ void
 lock_acquire(struct lock *lock)
 {
         // Write this
-
+#if OPT_LOCKS
+        spinlock_acquire(&lock->lk_lock);
+        lock->owner = curthread;
+        spinlock_release(&lock->lk_lock);
+        P(lock->lk_semaphore);
+#else
         (void)lock;  // suppress warning until code gets written
+#endif
 }
 
 void
 lock_release(struct lock *lock)
 {
         // Write this
-
+#if OPT_LOCKS
+        KASSERT(lock_do_i_hold(lock));
+        spinlock_acquire(&lock->lk_lock);
+        lock->owner = NULL;
+        spinlock_release(&lock->lk_lock);
+        V(lock->lk_semaphore);
+#else
         (void)lock;  // suppress warning until code gets written
+#endif
 }
 
 bool
 lock_do_i_hold(struct lock *lock)
 {
         // Write this
-
-        (void)lock;  // suppress warning until code gets written
-
-        return true; // dummy until code gets written
+#ifdef OPT_LOCKS
+        bool do_i_hold;
+        spinlock_acquire(&lock->lk_lock);
+        do_i_hold = lock->owner == curthread; 
+        spinlock_release(&lock->lk_lock);
+        return do_i_hold;
+#else
+        (void)lock;
+#endif
 }
 
 ////////////////////////////////////////////////////////////
