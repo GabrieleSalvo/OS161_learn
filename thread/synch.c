@@ -165,6 +165,7 @@ lock_create(const char *name)
         return lock;
 }
 
+
 void
 lock_destroy(struct lock *lock)
 {
