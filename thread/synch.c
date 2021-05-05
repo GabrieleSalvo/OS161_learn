@@ -184,9 +184,14 @@ lock_acquire(struct lock *lock)
 {
         // Write this
 #if OPT_LOCKS
-        spinlock_acquire(&lock->lk_lock);
-        lock->owner = curthread;
-        spinlock_release(&lock->lk_lock);
+        bool lock_free = false;
+        while(!lock_free){
+                spinlock_acquire(&lock->lk_lock);
+                lock_free = lock->owner == NULL;
+                if (lock_free)
+                        lock->owner = curthread;
+                spinlock_release(&lock->lk_lock);
+        }
         P(lock->lk_semaphore);
 #else
         (void)lock;  // suppress warning until code gets written
