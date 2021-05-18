@@ -8,7 +8,8 @@
 #include <proc.h>
 #include <thread.h>
 #include <addrspace.h>
-
+#include <current.h>
+#include <synch.h>
 
 
 int sys_write(int filehandle, const void* buf, size_t size){
@@ -42,8 +43,10 @@ int sys_read(int filehandle, void* buf, size_t size){
 	return (int)size;
 }
 void sys__exit(int status){
-	struct addrspace *as = proc_getas();
-	as_destroy(as);
+	curproc->status = status;
+	proc_remthread(curthread);
+	V(curproc->sem);
+	//struct addrspace *as = proc_getas();
+	//as_destroy(as);
 	thread_exit();
-	(void)status;
 }

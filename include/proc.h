@@ -37,6 +37,8 @@
  */
 
 #include <spinlock.h>
+#include <synch.h>
+#include "opt-syscalls.h"
 
 struct addrspace;
 struct thread;
@@ -71,6 +73,11 @@ struct proc {
 	struct vnode *p_cwd;		/* current working directory */
 
 	/* add more material here as needed */
+#if OPT_SYSCALLS
+	struct semaphore *sem;
+
+	int status;
+#endif
 };
 
 /* This is the process structure for the kernel and for kernel-only threads. */
@@ -91,11 +98,16 @@ int proc_addthread(struct proc *proc, struct thread *t);
 /* Detach a thread from its process. */
 void proc_remthread(struct thread *t);
 
+#if OPT_SYSCALLS
+int proc_wait(struct proc *p);
+#endif
+
 /* Fetch the address space of the current process. */
 struct addrspace *proc_getas(void);
 
 /* Change the address space of the current process, and return the old one. */
 struct addrspace *proc_setas(struct addrspace *);
+
 
 
 #endif /* _PROC_H_ */

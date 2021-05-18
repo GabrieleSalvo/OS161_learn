@@ -81,10 +81,19 @@ proc_create(const char *name)
 
 	/* VFS fields */
 	proc->p_cwd = NULL;
+	proc->sem = sem_create(name, 0);
 
 	return proc;
 }
-
+#if OPT_SYSCALLS
+int proc_wait(struct proc* p){
+	int status;
+	status = p->status;
+	P(p->sem);
+	proc_destroy(p);
+	return status;
+}
+#endif
 /*
  * Destroy a proc structure.
  *
@@ -167,6 +176,8 @@ proc_destroy(struct proc *proc)
 
 	KASSERT(proc->p_numthreads == 0);
 	spinlock_cleanup(&proc->p_lock);
+
+	sem_destroy(proc->sem);
 
 	kfree(proc->p_name);
 	kfree(proc);

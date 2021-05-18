@@ -43,6 +43,7 @@
 #include <test.h>
 #include "opt-sfs.h"
 #include "opt-net.h"
+#include "opt-syscalls.h"
 
 /*
  * In-kernel menu and command dispatcher.
@@ -113,7 +114,7 @@ int
 common_prog(int nargs, char **args)
 {
 	struct proc *proc;
-	int result;
+	int result, exit_code;
 
 	/* Create a process for the new program to run in. */
 	proc = proc_create_runprogram(args[0] /* name */);
@@ -130,13 +131,12 @@ common_prog(int nargs, char **args)
 		proc_destroy(proc);
 		return result;
 	}
-
-	/*
-	 * The new process will be destroyed when the program exits...
-	 * once you write the code for handling that.
-	 */
-
+#if OPT_SYSCALLS
+	exit_code = proc_wait(proc);
+	return exit_code;
+#else
 	return 0;
+#endif
 }
 
 /*
