@@ -115,6 +115,7 @@ common_prog(int nargs, char **args)
 {
 	struct proc *proc;
 	int result, exit_code;
+	pid_t pid;
 
 	/* Create a process for the new program to run in. */
 	proc = proc_create_runprogram(args[0] /* name */);
@@ -132,7 +133,10 @@ common_prog(int nargs, char **args)
 		return result;
 	}
 #if OPT_SYSCALLS
-	exit_code = proc_wait(proc);
+	pid = getpid(proc);
+	KASSERT(pid != -1);
+	exit_code = proc_waitpid(pid);
+	//exit_code = proc_wait(proc);
 	return exit_code;
 #else
 	return 0;

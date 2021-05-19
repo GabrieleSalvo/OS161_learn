@@ -784,9 +784,13 @@ thread_exit(void)
 	 * Detach from our process. You might need to move this action
 	 * around, depending on how your wait/exit works.
 	 */
-	//proc_remthread(cur);
+	if (cur->t_proc != NULL){
+		proc_remthread(cur);
+		KASSERT(cur->t_proc == NULL);
+	}
 
 	/* Make sure we *are* detached (move this only if you're sure!) */
+	
 	KASSERT(cur->t_proc == NULL);
 
 	/* Check the stack guard band. */

@@ -44,9 +44,7 @@ int sys_read(int filehandle, void* buf, size_t size){
 }
 void sys__exit(int status){
 	curproc->status = status;
-	proc_remthread(curthread);
+	//proc_remthread(curthread); -> questo è sbagliato
 	V(curproc->sem);
-	//struct addrspace *as = proc_getas();
-	//as_destroy(as);
 	thread_exit();
 }

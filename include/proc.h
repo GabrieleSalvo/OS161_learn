@@ -39,6 +39,13 @@
 #include <spinlock.h>
 #include <synch.h>
 #include "opt-syscalls.h"
+#include "limits.h"
+
+#if OPT_SYSCALLS
+
+#define TABLE_SIZE 100
+
+#endif
 
 struct addrspace;
 struct thread;
@@ -108,6 +115,15 @@ struct addrspace *proc_getas(void);
 /* Change the address space of the current process, and return the old one. */
 struct addrspace *proc_setas(struct addrspace *);
 
+pid_t getpid(struct  proc* pr);
+
+void setpid(struct proc* pr);
+
+struct proc* getProcessFromPid(pid_t pid);
+
+int proc_waitpid(pid_t pid);
+
+void init_proc_table(void);
 
 
 #endif /* _PROC_H_ */

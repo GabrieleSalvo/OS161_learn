@@ -54,6 +54,11 @@
  */
 struct proc *kproc;
 
+struct proc* proc_table[TABLE_SIZE];
+
+int glob_proc_id;
+
+
 /*
  * Create a proc structure.
  */
@@ -88,8 +93,13 @@ proc_create(const char *name)
 #if OPT_SYSCALLS
 int proc_wait(struct proc* p){
 	int status;
-	status = p->status;
+	/*P(p->sem);
+	proc_destroy(p);
+	return status;*/
+	KASSERT(p!=NULL);
+	KASSERT(p!=kproc);
 	P(p->sem);
+	status = p->status;
 	proc_destroy(p);
 	return status;
 }
@@ -193,7 +203,18 @@ proc_bootstrap(void)
 	if (kproc == NULL) {
 		panic("proc_create for kproc failed\n");
 	}
+	init_proc_table();
 }
+
+void init_proc_table(void){
+	int i;
+	for(i=0;i<100;i++){
+		proc_table[i]=NULL;
+	}
+	glob_proc_id = PID_MIN;
+}
+
+
 
 /*
  * Create a fresh proc for use by runprogram.
@@ -229,7 +250,44 @@ proc_create_runprogram(const char *name)
 	}
 	spinlock_release(&curproc->p_lock);
 
+	setpid(newproc);
+
 	return newproc;
+}
+
+void setpid(struct proc* pr){
+	proc_table[glob_proc_id] = pr;
+	glob_proc_id++;
+}
+
+pid_t getpid(struct  proc* pr){
+	pid_t return_pid;
+	int i;
+	bool found = false;
+	for(i=2;i<100 && !found;i++){
+		if (proc_table[i] == pr){
+			return_pid = i;
+			found =true;
+		}
+	}
+	if(!found){
+		return -1;
+	}
+	return return_pid;
+}
+
+
+
+int proc_waitpid(pid_t pid){
+	struct proc* pr;
+	pr = getProcessFromPid(pid);
+	return proc_wait(pr);
+}
+
+struct proc* getProcessFromPid(pid_t pid){
+	KASSERT(pid>=PID_MIN);
+	KASSERT(pid<=PID_MAX);
+	return proc_table[pid];
 }
 
 /*
